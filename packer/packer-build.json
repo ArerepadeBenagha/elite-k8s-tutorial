@@ -1,22 +1,28 @@
 {
-    "variables": {
-      "aws_access_key": "",
-      "aws_secret_key": ""
-    },
-    "builders": [{
+  "variables": {
+    "aws_access_key": "{{env `aws_access_key`}}",
+    "aws_secret_key": "{{env `aws_secret_key`}}",
+    "aws_region": "{{env `aws_region`}}"
+  },
+  "builders": [
+    {
       "type": "amazon-ebs",
       "access_key": "{{user `aws_access_key`}}",
       "secret_key": "{{user `aws_secret_key`}}",
-      "region": "us-east-1",
-      "source_ami": "ami-013f17f36f8b1fefb",
+      "region": "{{user `aws_region`}}",
+      "source_ami_filter": {
+        "filters": {
+          "virtualization-type": "hvm",
+          "name": "ubuntu/images/*ubuntu-bionic-18.04-amd64-server-*",
+          "root-device-type": "ebs"
+        },
+        "owners": ["099720109477"],
+        "most_recent": true
+      },
       "instance_type": "t2.micro",
       "ssh_username": "ubuntu",
-      "ami_name": "packer-example {{timestamp}}"
-    }],
-    "provisioners": [{
-      "type": "shell",
-      "scripts": [  "scripts/software.sh"   ],
-      "execute_command": "{{ .Vars }} sudo -E sh '{{ .Path }}'",
-      "pause_before": "10s"
-    }]
-  }
+      "ami_name": "app-{{user `environment`}}-{{timestamp}}"
+    }
+  ],
+  "provisioners": []
+}
